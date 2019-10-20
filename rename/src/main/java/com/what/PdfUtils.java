@@ -1,39 +1,49 @@
 package com.what;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Image;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfWriter;
+import sun.jvm.hotspot.debugger.Page;
+
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class PdfUtils {
-    private static final String imgPath="F:\\imgs";
-    public static void main(String[] args) {
-            Document doc = new Document();
-            try {
-                PdfWriter.getInstance(doc, new FileOutputStream("7.pdf"));
-                doc.open();
-                File file = new File(imgPath);
-                for (File f : file.listFiles()) {
-                    if (f.getName().endsWith(".jpg")) {
-                        Image image = Image.getInstance(f.getAbsolutePath());
-                        image.setWidthPercentage(100);
-//                        image.setScaleToFitHeight(true);
-//                        image.setScaleToFitLineWhenOverflow(true);
-                        image.setRotationDegrees(-90);
-                        image.scaleToFit(800,700);
-                        doc.add(image);
-                    }
-                }
+    private static final String imgPath = "/Users/anjun/bd/soft/imgs";
+    private static final Rectangle rect = new Rectangle(PageSize.A1.getHeight(), PageSize.A1.getWidth());
+    public static void main(String[] args) throws IOException, DocumentException {
 
-            } catch (DocumentException | IOException e) {
-                e.printStackTrace();
-            } finally {
-                doc.close();
+        java.util.List<String> items = new ArrayList();
+        File file = new File(imgPath);
+        for (File f : file.listFiles()) {
+            if (f.getName().endsWith(".jpg")) {
+                items.add(f.getName());
             }
         }
+
+        Document doc = new Document();
+        PdfWriter.getInstance(doc, new FileOutputStream("spark机器学习进阶实战.pdf"));
+        doc.setPageSize(rect);
+
+        doc.open();
+        items=items.stream().sorted().collect(Collectors.toList());
+
+        for (String f : items) {
+
+            Image image = Image.getInstance(Paths.get(imgPath,f).toAbsolutePath().toString());
+//                        image.setWidthPercentage(100);
+//                        image.setScaleToFitHeight(true);
+//                        image.setScaleToFitLineWhenOverflow(true);
+//                        image.setRotationDegrees(-90);
+//            image.scaleToFit(rect.getWidth(),rect.getHeight()+333);
+            image.scaleToFit(doc.getPageSize());
+            doc.add(image);
+        }
+        doc.close();
+    }
 
 }
